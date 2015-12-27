@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 #include <windows.h> 
+#include <direct.h>
+#include <sys/types.h>
 
 using namespace std;
 using namespace sf;

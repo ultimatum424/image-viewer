@@ -40,7 +40,7 @@ void initZoom(Zoom &zoom, int inc, Vector2f &img_center)
 	img_center.x *= t;
 	img_center.y *= t;
 	zoom.scale *= t;
-	zoom.is_not_scaled = zoom.number == 0;
+	zoom.is_not_scaled = (zoom.number == 0);
 }
 void initNextFile(bool &next_file, float &scale, int &file_number, int inc) 
 {
@@ -58,40 +58,38 @@ void drawButton(RenderWindow &app, Texture txtr, Vector2i img_start, Vector2i im
 	Sprite sprt;
 	sprt.setTexture(txtr);
 	sprt.setTextureRect(IntRect(img_start, img_size));
-	View view(FloatRect(0.f, 0.f, float(app.getSize().x), float(app.getSize().y)));
-	app.setView(view);
+
 	sprt.setPosition(app_pos);
 	app.draw(sprt);
 }
-void setButton(button &but, RenderWindow &window, Vector2f pos_on_display)
+void UpdateButton(button &but, RenderWindow &window, Vector2f pos_on_display)
 {
 	but.pos = pos_on_display;
 	drawButton(window, but.texture, but.start, but.size, but.pos);
 }
-void setInterface(Interface &intface, RenderWindow &window) 
+void UpdateInterface(Interface &intface, RenderWindow &window)
 {
+	View view(FloatRect(0.f, 0.f, float(window.getSize().x), float(window.getSize().y)));
+	window.setView(view);
 	Vector2f app_size = Vector2f(window.getSize());
-	setButton(intface.left, window, Vector2f({ 0, app_size.y - but_size }));
-	setButton(intface.right, window, Vector2f({ float(but_size), app_size.y - but_size }));
-	setButton(intface.minus, window, Vector2f({ app_size.x - 2 * but_size, app_size.y - but_size }));
-	setButton(intface.plus, window, Vector2f({ app_size.x - but_size, app_size.y - but_size }));
+	UpdateButton(intface.left, window, Vector2f({ 0, app_size.y - but_size }));
+	UpdateButton(intface.right, window, Vector2f({ float(but_size), app_size.y - but_size }));
+	UpdateButton(intface.minus, window, Vector2f({ app_size.x - 2 * but_size, app_size.y - but_size }));
+	UpdateButton(intface.plus, window, Vector2f({ app_size.x - but_size, app_size.y - but_size }));
 }
-void setEvent(RenderWindow &window, Mouse_struct &mouse, Interface &intface, Zoom &zoom, Files &files, Img &img)
+void dispatchEvent(RenderWindow &window, Mouse_struct &mouse, Interface &intface, Zoom &zoom, Files &files, Img &img)
 {
 	Event event;
-	while (window.pollEvent(event)) 
-	{
+	while (window.pollEvent(event)) {
 		if (event.type == Event::MouseButtonPressed)
-			if (event.key.code == Mouse::Left)
-			{
+			if (event.key.code == Mouse::Left) {
 				mouse.is_clicked = true;
 				mouse.pos = mouse.new_pos = Mouse::getPosition(window);
 			}
-		if (event.type == Event::MouseButtonReleased)
+		else if (event.type == Event::MouseButtonReleased)
 			if (event.key.code == Mouse::Left)
 				mouse.is_released = true;
-		if (event.type == Event::KeyPressed || mouse.is_released) 
-		{
+		else if (event.type == Event::KeyPressed || mouse.is_released) {
 			if ((event.key.code == Keyboard::Add || isInRect(mouse.new_pos, intface.plus.pos, intface.plus.size)) && zoom.number < scale_count - 1)
 				initZoom(zoom, 1, img.center);
 			else if ((event.key.code == Keyboard::Subtract || isInRect(mouse.new_pos, intface.minus.pos, intface.minus.size)) && zoom.number > 0)
@@ -102,13 +100,12 @@ void setEvent(RenderWindow &window, Mouse_struct &mouse, Interface &intface, Zoo
 				else if ((event.key.code == Keyboard::Right || isInRect(mouse.new_pos, intface.right.pos, intface.right.size)) && files.number < files.list.size() - 1)
 					initNextFile(files.can_get_next, zoom.scale, files.number, 1);
 		}
-		if (event.type == Event::Closed)
+		else if (event.type == Event::Closed)
 			window.close();
 	}
 }
 int getFilesList(string mask, vector <string>  &files)
 {
-	
 	HANDLE h_find;
 	WIN32_FIND_DATA find_data;
 	std::wstring stemp = std::wstring(mask.begin(), mask.end());
@@ -202,20 +199,19 @@ int drawImage(Texture &texture, RenderWindow& app, bool is_not_scale, float &sca
 	return 0;
 }
 
-
 void RunProgram(RenderWindow& window)
 {
 	Init init;
 	getFormFilesList(init.files);
 	while (window.isOpen())
 	{
-		setEvent(window, init.mouse, init.intface, init.zoom, init.files, init.img);
+		dispatchEvent(window, init.mouse, init.intface, init.zoom, init.files, init.img);
 
 		window.clear();
 
 		setNextFile(init.files, init.img.texture, window, error_file);
 		drawImage(init.img.texture, window, init.zoom.is_not_scaled, init.zoom.scale, getMove(init.mouse, window), init.img.center);
-		setInterface(init.intface, window);
+		UpdateInterface(init.intface, window);
 	}
 		window.display();
 
