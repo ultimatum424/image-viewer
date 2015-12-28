@@ -14,12 +14,12 @@ using namespace std;
 using namespace sf;
 
 
-const string error_file = "images/error.png";
+const string error_file = "../image/error.png";
 const int but_size = 50;
 const int but_count = 4;
 const float min_app_size = 500;
 const int scale_count = 8;
-const string but_file = "images/buttons2.png";
+const string but_file = "../image/buttons2.png";
 
 
 struct Mouse_struct 
@@ -33,7 +33,7 @@ struct Files
 {
 	vector <string> list;
 	vector <string> formats = { "jpg", "bmp", "png" };
-	string dir_name = "D:/images/";
+	string dir_name = "D:/project/";
 	int number = 0;
 	bool can_get_next = true;
 };

@@ -1,4 +1,5 @@
 #include "config.h"
+#include <dirent.h>
 
 
 using namespace sf;
@@ -104,35 +105,33 @@ void dispatchEvent(RenderWindow &window, Mouse_struct &mouse, Interface &intface
 			window.close();
 	}
 }
-int getFilesList(string mask, vector <string>  &files)
-{
-	HANDLE h_find;
-	WIN32_FIND_DATA find_data;
-	std::wstring stemp = std::wstring(mask.begin(), mask.end());
-	LPCTSTR s = stemp.c_str();
-	h_find = FindFirstFile(s, &find_data);
-
-	if (h_find != INVALID_HANDLE_VALUE)
-	{
-		do 
+std::vector<std::string> results; 
+void Search(std::string curr_directory, vector <string> formats) {
+	string extension;
+	DIR* dir_point = opendir(curr_directory.c_str());
+	dirent* entry = readdir(dir_point);
+	while (entry) {									
+		if (entry->d_type == DT_DIR)
 		{
-			files.push_back(find_data.cFileName);
-		} while (FindNextFile(h_find, &find_data));
+			for (int i = 0; i < formats.size(); ++i)
+			{
+				extension = formats[i];
+				std::string fname = entry->d_name;
+				if (fname != "." && fname != "..")
+					Search(entry->d_name, formats);	
+			}
+										
+		}
+		else if (entry->d_type == DT_REG) {		
+			std::string fname = entry->d_name;	
+												
+			if (fname.find(extension, (fname.length() - extension.length())) != std::string::npos)
+				results.push_back(fname);		
+		}
+		entry = readdir(dir_point);
 	}
-
-	FindClose(h_find);
-
-	return 0;
+	return;
 }
-void getFormFilesList(Files &files) 
-{
-	for (int i = 0; i < files.formats.size(); ++i)
-	{
-		string mask = files.dir_name;
-		getFilesList(mask.append("*.").append(files.formats[i]), files.list);
-	}
-}
-
 Texture getTexture(std::string name) 
 {
 	Texture but_texture;
@@ -202,7 +201,8 @@ int drawImage(Texture &texture, RenderWindow& app, bool is_not_scale, float &sca
 void RunProgram(RenderWindow& window)
 {
 	Init init;
-	getFormFilesList(init.files);
+	Search(init.files.dir_name, init.files.formats);
+	init.files.list = results;
 	while (window.isOpen())
 	{
 		dispatchEvent(window, init.mouse, init.intface, init.zoom, init.files, init.img);
