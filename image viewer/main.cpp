@@ -49,7 +49,7 @@ void initNextFile(bool &next_file, float &scale, int &file_number, int inc)
 	scale = 1.f;
 	next_file = true;
 }
-bool isInRect(Vector2i el_coor, Vector2f rect_coor, Vector2i rect_size) 
+bool isInRect(Vector2i& el_coor, Vector2f& rect_coor, Vector2i& rect_size) 
 {
 	return (el_coor.x >= rect_coor.x && el_coor.y >= rect_coor.y &&
 		el_coor.x <= rect_coor.x + rect_size.x && el_coor.y <= rect_coor.y + rect_size.y);
@@ -105,8 +105,7 @@ void dispatchEvent(RenderWindow &window, Mouse_struct &mouse, Interface &intface
 			window.close();
 	}
 }
-std::vector<std::string> results; 
-void Search(std::string curr_directory, vector <string> formats) {
+void Search(std::string curr_directory, vector <string> formats, vector <string>& results) {
 	string extension;
 	DIR* dir_point = opendir(curr_directory.c_str());
 	dirent* entry = readdir(dir_point);
@@ -118,7 +117,7 @@ void Search(std::string curr_directory, vector <string> formats) {
 				extension = formats[i];
 				std::string fname = entry->d_name;
 				if (fname != "." && fname != "..")
-					Search(entry->d_name, formats);	
+					Search(entry->d_name, formats, results);
 			}
 										
 		}
@@ -130,6 +129,7 @@ void Search(std::string curr_directory, vector <string> formats) {
 		}
 		entry = readdir(dir_point);
 	}
+	closedir(dir_point);
 	return;
 }
 Texture getTexture(std::string name) 
@@ -147,7 +147,7 @@ float getScale(Vector2f img_size, Vector2f app_size)
 	}
 	return 1.f;
 }
-float checkExtremeCenter(float center, float app_size, float img_size, float scale)
+float checkExtremeCenter(float& center, float& app_size, float& img_size, float& scale)
 {
 	float temp1 = app_size / 2;
 	center = (center < temp1) ? temp1 : center;
@@ -155,7 +155,7 @@ float checkExtremeCenter(float center, float app_size, float img_size, float sca
 	center = (center > temp2) ? temp2 : center;
 	return center;
 }
-float getExtremeCenter(float img_center, float app_size, float img_size, float scale) 
+float getExtremeCenter(float& img_center, float& app_size, float& img_size, float& scale) 
 {
 	if (img_size * scale > app_size)
 		return checkExtremeCenter(img_center, app_size, img_size, scale);
@@ -201,8 +201,7 @@ int drawImage(Texture &texture, RenderWindow& app, bool is_not_scale, float &sca
 void RunProgram(RenderWindow& window)
 {
 	Init init;
-	Search(init.files.dir_name, init.files.formats);
-	init.files.list = results;
+	Search(init.files.dir_name, init.files.formats, init.files.list);
 	while (window.isOpen())
 	{
 		dispatchEvent(window, init.mouse, init.intface, init.zoom, init.files, init.img);
