@@ -6,7 +6,7 @@ using namespace sf;
 using namespace std;
 
 
-void setNextFile(Files &files, Texture &texture, RenderWindow &window, string error_file) 
+void SetNextFile(Files &files, Texture &texture, RenderWindow &window, string error_file) 
 {
 	if (files.can_get_next) 
 	{
@@ -18,7 +18,7 @@ void setNextFile(Files &files, Texture &texture, RenderWindow &window, string er
 		window.setTitle(files.list[files.number]);
 	}
 }
-Vector2i getMove(Mouse_struct &mouse, RenderWindow &window)
+Vector2i GetMove(Mouse_struct &mouse, RenderWindow &window)
 {
 	Vector2i move = { 0, 0 };
 	if (mouse.is_clicked) 
@@ -34,7 +34,7 @@ Vector2i getMove(Mouse_struct &mouse, RenderWindow &window)
 	}
 	return move;
 }
-void initZoom(Zoom &zoom, int inc, Vector2f &img_center)
+void InitZoom(Zoom &zoom, int inc, Vector2f &img_center)
 {
 	float t = zoom.modes[zoom.number + inc] / zoom.modes[zoom.number];
 	zoom.number += inc;
@@ -43,18 +43,18 @@ void initZoom(Zoom &zoom, int inc, Vector2f &img_center)
 	zoom.scale *= t;
 	zoom.is_not_scaled = (zoom.number == 0);
 }
-void initNextFile(bool &next_file, float &scale, int &file_number, int inc) 
+void InitNextFile(bool &next_file, float &scale, int &file_number, int inc) 
 {
 	file_number += inc;
 	scale = 1.f;
 	next_file = true;
 }
-bool isInRect(Vector2i& el_coor, Vector2f& rect_coor, Vector2i& rect_size) 
+bool IsInRect(Vector2i& el_coor, Vector2f& rect_coor, Vector2i& rect_size) 
 {
 	return (el_coor.x >= rect_coor.x && el_coor.y >= rect_coor.y &&
 		el_coor.x <= rect_coor.x + rect_size.x && el_coor.y <= rect_coor.y + rect_size.y);
 }
-void drawButton(RenderWindow &app, Texture txtr, Vector2i img_start, Vector2i img_size, Vector2f app_pos) 
+void DrawButton(RenderWindow &app, Texture txtr, Vector2i img_start, Vector2i img_size, Vector2f app_pos) 
 {
 	Sprite sprt;
 	sprt.setTexture(txtr);
@@ -66,7 +66,7 @@ void drawButton(RenderWindow &app, Texture txtr, Vector2i img_start, Vector2i im
 void UpdateButton(button &but, RenderWindow &window, Vector2f pos_on_display)
 {
 	but.pos = pos_on_display;
-	drawButton(window, but.texture, but.start, but.size, but.pos);
+	DrawButton(window, but.texture, but.start, but.size, but.pos);
 }
 void UpdateInterface(Interface &intface, RenderWindow &window)
 {
@@ -78,7 +78,7 @@ void UpdateInterface(Interface &intface, RenderWindow &window)
 	UpdateButton(intface.minus, window, Vector2f({ app_size.x - 2 * but_size, app_size.y - but_size }));
 	UpdateButton(intface.plus, window, Vector2f({ app_size.x - but_size, app_size.y - but_size }));
 }
-void dispatchEvent(RenderWindow &window, Mouse_struct &mouse, Interface &intface, Zoom &zoom, Files &files, Img &img)
+void DispatchEvent(RenderWindow &window, Mouse_struct &mouse, Interface &intface, Zoom &zoom, Files &files, Img &img)
 {
 	Event event;
 	while (window.pollEvent(event)) {
@@ -91,15 +91,15 @@ void dispatchEvent(RenderWindow &window, Mouse_struct &mouse, Interface &intface
 			if (event.key.code == Mouse::Left)
 				mouse.is_released = true;
 		else if (event.type == Event::KeyPressed || mouse.is_released) {
-			if ((event.key.code == Keyboard::Add || isInRect(mouse.new_pos, intface.plus.pos, intface.plus.size)) && zoom.number < scale_count - 1)
-				initZoom(zoom, 1, img.center);
-			else if ((event.key.code == Keyboard::Subtract || isInRect(mouse.new_pos, intface.minus.pos, intface.minus.size)) && zoom.number > 0)
-				initZoom(zoom, -1, img.center);
+			if ((event.key.code == Keyboard::Add || IsInRect(mouse.new_pos, intface.plus.pos, intface.plus.size)) && zoom.number < scale_count - 1)
+				InitZoom(zoom, 1, img.center);
+			else if ((event.key.code == Keyboard::Subtract || IsInRect(mouse.new_pos, intface.minus.pos, intface.minus.size)) && zoom.number > 0)
+				InitZoom(zoom, -1, img.center);
 			else if (zoom.is_not_scaled)
-				if ((event.key.code == Keyboard::Left || isInRect(mouse.new_pos, intface.left.pos, intface.left.size)) && files.number > 0)
-					initNextFile(files.can_get_next, zoom.scale, files.number, -1);
-				else if ((event.key.code == Keyboard::Right || isInRect(mouse.new_pos, intface.right.pos, intface.right.size)) && files.number < files.list.size() - 1)
-					initNextFile(files.can_get_next, zoom.scale, files.number, 1);
+				if ((event.key.code == Keyboard::Left || IsInRect(mouse.new_pos, intface.left.pos, intface.left.size)) && files.number > 0)
+					InitNextFile(files.can_get_next, zoom.scale, files.number, -1);
+				else if ((event.key.code == Keyboard::Right || IsInRect(mouse.new_pos, intface.right.pos, intface.right.size)) && files.number < files.list.size() - 1)
+					InitNextFile(files.can_get_next, zoom.scale, files.number, 1);
 		}
 		else if (event.type == Event::Closed)
 			window.close();
@@ -108,6 +108,7 @@ void dispatchEvent(RenderWindow &window, Mouse_struct &mouse, Interface &intface
 void Search(std::string curr_directory, vector <string> formats, vector <string>& results) {
 	string extension;
 	DIR* dir_point = opendir(curr_directory.c_str());
+	if (!dir_point) return;
 	dirent* entry = readdir(dir_point);
 	while (entry) {									
 		if (entry->d_type == DT_DIR)
@@ -132,13 +133,13 @@ void Search(std::string curr_directory, vector <string> formats, vector <string>
 	closedir(dir_point);
 	return;
 }
-Texture getTexture(std::string name) 
+Texture GetTexture(std::string name) 
 {
 	Texture but_texture;
 	but_texture.loadFromFile(name);
 	return but_texture;
 }
-float getScale(Vector2f img_size, Vector2f app_size) 
+float GetScale(Vector2f img_size, Vector2f app_size) 
 {
 	if (img_size.x > app_size.x || img_size.y > app_size.y) 
 	{
@@ -147,7 +148,7 @@ float getScale(Vector2f img_size, Vector2f app_size)
 	}
 	return 1.f;
 }
-float checkExtremeCenter(float& center, float& app_size, float& img_size, float& scale)
+float CheckExtremeCenter(float& center, float& app_size, float& img_size, float& scale)
 {
 	float temp1 = app_size / 2;
 	center = (center < temp1) ? temp1 : center;
@@ -155,13 +156,13 @@ float checkExtremeCenter(float& center, float& app_size, float& img_size, float&
 	center = (center > temp2) ? temp2 : center;
 	return center;
 }
-float getExtremeCenter(float& img_center, float& app_size, float& img_size, float& scale) 
+float GetExtremeCenter(float& img_center, float& app_size, float& img_size, float& scale) 
 {
 	if (img_size * scale > app_size)
-		return checkExtremeCenter(img_center, app_size, img_size, scale);
+		return CheckExtremeCenter(img_center, app_size, img_size, scale);
 	return scale * img_size / 2;
 }
-int drawImage(Texture &texture, RenderWindow& app, bool is_not_scale, float &scale, Vector2i move, Vector2f &img_center) 
+int DrawImage(Texture &texture, RenderWindow& app, bool is_not_scale, float &scale, Vector2i move, Vector2f &img_center) 
 {
 
 	Vector2f app_size = Vector2f(app.getSize());
@@ -176,15 +177,15 @@ int drawImage(Texture &texture, RenderWindow& app, bool is_not_scale, float &sca
 	sprite.setTexture(texture);
 
 	if (is_not_scale)
-		scale = getScale(img_size, app_size);
+		scale = GetScale(img_size, app_size);
 
 	sprite.scale(scale, scale);
 
 	img_center.x += move.x;
 	img_center.y += move.y;
 
-	img_center.x = getExtremeCenter(img_center.x, app_size.x, img_size.x, scale);
-	img_center.y = getExtremeCenter(img_center.y, app_size.y, img_size.y, scale);
+	img_center.x = GetExtremeCenter(img_center.x, app_size.x, img_size.x, scale);
+	img_center.y = GetExtremeCenter(img_center.y, app_size.y, img_size.y, scale);
 
 	FloatRect rect = { Vector2f({ 0, 0 }), app_size };
 	View view(rect);
@@ -202,14 +203,19 @@ void RunProgram(RenderWindow& window)
 {
 	Init init;
 	Search(init.files.dir_name, init.files.formats, init.files.list);
+	if (init.files.list.size() == 0)
+	{
+		std::cout << "folder not found";
+		window.close();
+	}
 	while (window.isOpen())
 	{
-		dispatchEvent(window, init.mouse, init.intface, init.zoom, init.files, init.img);
+		DispatchEvent(window, init.mouse, init.intface, init.zoom, init.files, init.img);
 
 		window.clear();
 
-		setNextFile(init.files, init.img.texture, window, error_file);
-		drawImage(init.img.texture, window, init.zoom.is_not_scaled, init.zoom.scale, getMove(init.mouse, window), init.img.center);
+		SetNextFile(init.files, init.img.texture, window, error_file);
+		DrawImage(init.img.texture, window, init.zoom.is_not_scaled, init.zoom.scale, GetMove(init.mouse, window), init.img.center);
 		UpdateInterface(init.intface, window);
 	}
 		window.display();

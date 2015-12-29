@@ -33,7 +33,7 @@ struct Files
 {
 	vector <string> list;
 	vector <string> formats = { "jpg", "bmp", "png" };
-	string dir_name = "D:/project/";
+	string dir_name = "D:/51/";
 	int number = 0;
 	bool can_get_next = true;
 };
@@ -50,13 +50,13 @@ struct button
 	Vector2i size;
 	Vector2f pos;
 };
-Texture getTexture(std::string name);
+Texture GetTexture(std::string name);
 struct Interface 
 {
-	button left = { getTexture(but_file), Vector2i({ 0, 0 }), Vector2i({ but_size, but_size }), Vector2f({ 0, 0 }) };
-	button right = { getTexture(but_file), Vector2i({ but_size, 0 }), Vector2i({ but_size, but_size }), Vector2f({ 0, 0 }) };
-	button minus = { getTexture(but_file), Vector2i({ but_size * 2, 0 }), Vector2i({ but_size, but_size }), Vector2f({ 0, 0 }) };
-	button plus = { getTexture(but_file), Vector2i({ but_size * 3, 0 }), Vector2i({ but_size, but_size }), Vector2f({ 0, 0 }) };
+	button left = { GetTexture(but_file), Vector2i({ 0, 0 }), Vector2i({ but_size, but_size }), Vector2f({ 0, 0 }) };
+	button right = { GetTexture(but_file), Vector2i({ but_size, 0 }), Vector2i({ but_size, but_size }), Vector2f({ 0, 0 }) };
+	button minus = { GetTexture(but_file), Vector2i({ but_size * 2, 0 }), Vector2i({ but_size, but_size }), Vector2f({ 0, 0 }) };
+	button plus = { GetTexture(but_file), Vector2i({ but_size * 3, 0 }), Vector2i({ but_size, but_size }), Vector2f({ 0, 0 }) };
 };
 struct Zoom 
 {
